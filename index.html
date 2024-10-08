@@ -157,9 +157,8 @@
     </div>
 
     <script>
-    function fetchUserLinks(type) {
+   function fetchUserLinks(type) {
     const input = type === 'username' ? document.getElementById('usernameInput').value.trim() : document.getElementById('referralInput').value.trim();
-
     const errorMessage = document.getElementById('errorMessage');
 
     if (!input) {
@@ -167,6 +166,34 @@
         return;
     }
 
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxODgmwA9CEYgT4e8UqOy62-ZtGwi6aPbsVJ3zzUK7dO9Fed_Xa6gVjhVw0KUmSliBs/exec';
+
+    const params = new URLSearchParams();
+    params.append(type, input);
+
+    fetch(`${scriptUrl}?${params.toString()}`)
+        .then(response => response.text()) // Change this to text() instead of json()
+        .then(text => {
+            try {
+                const data = JSON.parse(text);
+                if (data.error) {
+                    errorMessage.textContent = data.error;
+                    document.getElementById('linksList').innerHTML = '';
+                } else {
+                    errorMessage.textContent = '';
+                    displayLinks(data);
+                }
+            } catch (e) {
+                console.error('Error parsing response:', e);
+                errorMessage.textContent = 'Error processing the response. Please try again later.';
+                document.getElementById('linksList').innerHTML = '';
+            }
+        })
+        .catch(error => {
+            errorMessage.textContent = 'Error fetching your links. Please try again later.';
+            console.error('Error:', error);
+        });
+}
     const scriptUrl = 'https://script.google.com/macros/s/AKfycbxODgmwA9CEYgT4e8UqOy62-ZtGwi6aPbsVJ3zzUK7dO9Fed_Xa6gVjhVw0KUmSliBs/exec';
 
     const params = new URLSearchParams();
