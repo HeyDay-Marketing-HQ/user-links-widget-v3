@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-     <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Personalized Page Links</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Nuntio Sans', sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f4f7f9;
             color: #333;
         }
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             background-color: white;
             border-radius: 12px;
@@ -57,11 +57,32 @@
         button:hover {
             background-color: #2980b9;
         }
-        .link-item {
+        .links-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .links-column {
+            flex: 1;
+            min-width: 300px;
+        }
+        .link-group {
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
+        }
+        .link-group h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        .link-item {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .link-name {
@@ -69,7 +90,7 @@
             color: #34495e;
             display: block;
             margin-bottom: 10px;
-            font-size: 18px;
+            font-size: 16px;
         }
         .link-url {
             display: block;
@@ -80,19 +101,20 @@
             background-color: #e9f2fb;
             border-radius: 4px;
             transition: background-color 0.3s;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
         }
         .link-url:hover {
             background-color: #d4e6f7;
         }
         .qr-code-container {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            flex-direction: column;
         }
         .qr-code {
-            margin-bottom: 10px;
+            width: 100px;
+            height: 100px;
         }
         .download-qr {
             padding: 8px 16px;
@@ -118,9 +140,25 @@
             color: #7f8c8d;
             margin: 10px 0;
         }
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
+        .spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0,0,0,.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @media (max-width: 768px) {
+            .links-container {
+                flex-direction: column;
+            }
+            .links-column {
+                min-width: auto;
             }
             .input-row {
                 flex-direction: column;
@@ -132,7 +170,7 @@
     </style>
 </head>
 <body>
-     <div class="container">
+    <div class="container">
         <h1>Your Personalized Page Links</h1>
         <div id="errorMessage" class="error-message"></div>
         <div class="input-section">
@@ -146,15 +184,13 @@
                 <button onclick="fetchUserLinks('referral')">Get My Links</button>
             </div>
         </div>
-        <div id="linksList"></div>
+        <div id="spinner" class="spinner"></div>
+        <div id="linksList" class="links-container"></div>
     </div>
-        </div>
-       <div id="spinner" class="spinner"></div>
-       <div id="linksList" class="links-container"></div>
 
     <script>
     function fetchUserLinks(type) {
-       const input = type === 'username' ? document.getElementById('usernameInput').value.trim() : document.getElementById('referralInput').value.trim();
+        const input = type === 'username' ? document.getElementById('usernameInput').value.trim() : document.getElementById('referralInput').value.trim();
         const errorMessage = document.getElementById('errorMessage');
         const spinner = document.getElementById('spinner');
 
@@ -163,7 +199,6 @@
             return;
         }
 
-        // Show spinner
         spinner.style.display = 'block';
         errorMessage.textContent = '';
         document.getElementById('linksList').innerHTML = '';
@@ -193,7 +228,6 @@
                 console.error('Error:', error);
             })
             .finally(() => {
-                // Hide spinner
                 spinner.style.display = 'none';
             });
     }
@@ -203,23 +237,24 @@
         const headers = data[0];
         const userRow = data[1];
         
-        let html = '';
+        let optinHtml = '<div class="links-column"><div class="link-group"><h2>Optin Page Links</h2>';
+        let infoHtml = '<div class="links-column"><div class="link-group"><h2>Info Page Links</h2>';
 
         const allLinks = [
-            {sheet: 'General Optin', display: 'GENERAL OPTIN'},
-            {sheet: 'Driver Optin', display: 'DRIVER OPTIN'},
-            {sheet: 'Rider Optin', display: 'RIDER OPTIN'},
-            {sheet: 'Rep Optin', display: 'REPS OPTIN'},
-            {sheet: 'General', display: 'GENERAL INFO PAGE'},
-            {sheet: 'Driver', display: 'DRIVER INFO PAGE'},
-            {sheet: 'Rider', display: 'RIDER INFO PAGE'},
-            {sheet: 'Rep', display: 'REPS INFO PAGE'}
+            {sheet: 'General Optin', display: 'GENERAL OPTIN', type: 'optin'},
+            {sheet: 'Driver Optin', display: 'DRIVER OPTIN', type: 'optin'},
+            {sheet: 'Rider Optin', display: 'RIDER OPTIN', type: 'optin'},
+            {sheet: 'Rep Optin', display: 'REPS OPTIN', type: 'optin'},
+            {sheet: 'General', display: 'GENERAL INFO PAGE', type: 'info'},
+            {sheet: 'Driver', display: 'DRIVER INFO PAGE', type: 'info'},
+            {sheet: 'Rider', display: 'RIDER INFO PAGE', type: 'info'},
+            {sheet: 'Rep', display: 'REPS INFO PAGE', type: 'info'}
         ];
 
         allLinks.forEach(function(link, index) {
             const columnIndex = headers.indexOf(link.sheet);
             if (columnIndex !== -1 && userRow[columnIndex]) {
-                html += `
+                const linkHtml = `
                     <div class="link-item">
                         <span class="link-name">${link.display}</span>
                         <a href="${userRow[columnIndex]}" target="_blank" class="link-url">${userRow[columnIndex]}</a>
@@ -228,10 +263,19 @@
                             <a href="#" class="download-qr" onclick="downloadQR('${userRow[columnIndex]}', '${link.display}'); return false;">Download QR</a>
                         </div>
                     </div>`;
+                
+                if (link.type === 'optin') {
+                    optinHtml += linkHtml;
+                } else {
+                    infoHtml += linkHtml;
+                }
             }
         });
 
-        linksList.innerHTML = html;
+        optinHtml += '</div></div>';
+        infoHtml += '</div></div>';
+
+        linksList.innerHTML = optinHtml + infoHtml;
 
         // Generate QR codes after the HTML has been added to the DOM
         allLinks.forEach(function(link, index) {
@@ -245,7 +289,8 @@
             }
         });
     }
-   function downloadQR(url, linkName) {
+
+    function downloadQR(url, linkName) {
         // Create a temporary container for the high-res QR code
         const tempContainer = document.createElement('div');
         document.body.appendChild(tempContainer);
@@ -280,6 +325,6 @@
             }, 'image/png');
         }
     }
-  </script>
+    </script>
 </body>
 </html>
