@@ -229,7 +229,7 @@
             {sheet: 'Rep', display: 'REPS INFO PAGE', type: 'info'}
         ];
 
-        allLinks.forEach(function(link, index) {
+       allLinks.forEach(function(link, index) {
             const columnIndex = headers.indexOf(link.sheet);
             if (columnIndex !== -1 && userRow[columnIndex]) {
                 const linkHtml = `
@@ -238,7 +238,10 @@
                             <span class="link-name">${link.display}</span>
                             <a href="${userRow[columnIndex]}" target="_blank" class="link-url">${userRow[columnIndex]}</a>
                         </div>
-                        <div id="qrcode-${index}" class="qr-code"></div>
+                        <div class="qr-code-container">
+                            <div id="qrcode-${index}" class="qr-code"></div>
+                            <a href="#" class="download-qr" onclick="downloadQR('${userRow[columnIndex]}', '${link.display}'); return false;">Download QR</a>
+                        </div>
                     </div>`;
                 
                 if (link.type === 'optin') {
@@ -266,6 +269,41 @@
             }
         });
     }
-    </script>
+   function downloadQR(url, linkName) {
+        // Create a temporary container for the high-res QR code
+        const tempContainer = document.createElement('div');
+        document.body.appendChild(tempContainer);
+
+        // Generate a high-res QR code
+        new QRCode(tempContainer, {
+            text: url,
+            width: 1000,
+            height: 1000
+        });
+
+        // Get the canvas from the high-res QR code
+        const canvas = tempContainer.querySelector('canvas');
+
+        if (canvas) {
+            // Convert canvas to blob
+            canvas.toBlob(function(blob) {
+                // Create a temporary URL for the blob
+                const url = URL.createObjectURL(blob);
+
+                // Create a link element and trigger download
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `QR_Code_${linkName.replace(/\s+/g, '_')}.png`;
+                document.body.appendChild(link);
+                link.click();
+
+                // Clean up
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                document.body.removeChild(tempContainer);
+            }, 'image/png');
+        }
+    }
+  </script>
 </body>
 </html>
