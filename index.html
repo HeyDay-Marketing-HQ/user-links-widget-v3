@@ -150,8 +150,6 @@
     <div class="container">
         <h1>Your Personalized Page Links</h1>
         <div id="errorMessage" class="error-message"></div>
-          <div id="spinner" class="spinner"></div>
-        <div id="linksList" class="links-container"></div>
         <div class="input-section">
             <div class="input-row">
                 <input type="text" id="usernameInput" placeholder="Enter your username" />
@@ -163,8 +161,8 @@
                 <button onclick="fetchUserLinks('referral')">Get My Links</button>
             </div>
         </div>
-        <div id="linksList" class="links-container"></div>
-    </div>
+       <div id="spinner" class="spinner"></div>
+       <div id="linksList" class="links-container"></div>
 
     <script>
     function fetchUserLinks(type) {
