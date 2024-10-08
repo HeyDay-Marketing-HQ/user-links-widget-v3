@@ -203,47 +203,35 @@
         const headers = data[0];
         const userRow = data[1];
         
-        let optinHtml = '<div class="links-column"><div class="link-group"><h2>Optin Page Links</h2>';
-        let infoHtml = '<div class="links-column"><div class="link-group"><h2>Info Page Links</h2>';
+        let html = '';
 
         const allLinks = [
-            {sheet: 'General Optin', display: 'GENERAL OPTIN', type: 'optin'},
-            {sheet: 'Driver Optin', display: 'DRIVER OPTIN', type: 'optin'},
-            {sheet: 'Rider Optin', display: 'RIDER OPTIN', type: 'optin'},
-            {sheet: 'Rep Optin', display: 'REPS OPTIN', type: 'optin'},
-            {sheet: 'General', display: 'GENERAL INFO PAGE', type: 'info'},
-            {sheet: 'Driver', display: 'DRIVER INFO PAGE', type: 'info'},
-            {sheet: 'Rider', display: 'RIDER INFO PAGE', type: 'info'},
-            {sheet: 'Rep', display: 'REPS INFO PAGE', type: 'info'}
+            {sheet: 'General Optin', display: 'GENERAL OPTIN'},
+            {sheet: 'Driver Optin', display: 'DRIVER OPTIN'},
+            {sheet: 'Rider Optin', display: 'RIDER OPTIN'},
+            {sheet: 'Rep Optin', display: 'REPS OPTIN'},
+            {sheet: 'General', display: 'GENERAL INFO PAGE'},
+            {sheet: 'Driver', display: 'DRIVER INFO PAGE'},
+            {sheet: 'Rider', display: 'RIDER INFO PAGE'},
+            {sheet: 'Rep', display: 'REPS INFO PAGE'}
         ];
 
-       allLinks.forEach(function(link, index) {
+        allLinks.forEach(function(link, index) {
             const columnIndex = headers.indexOf(link.sheet);
             if (columnIndex !== -1 && userRow[columnIndex]) {
-                const linkHtml = `
+                html += `
                     <div class="link-item">
-                        <div class="link-content">
-                            <span class="link-name">${link.display}</span>
-                            <a href="${userRow[columnIndex]}" target="_blank" class="link-url">${userRow[columnIndex]}</a>
-                        </div>
+                        <span class="link-name">${link.display}</span>
+                        <a href="${userRow[columnIndex]}" target="_blank" class="link-url">${userRow[columnIndex]}</a>
                         <div class="qr-code-container">
                             <div id="qrcode-${index}" class="qr-code"></div>
                             <a href="#" class="download-qr" onclick="downloadQR('${userRow[columnIndex]}', '${link.display}'); return false;">Download QR</a>
                         </div>
                     </div>`;
-                
-                if (link.type === 'optin') {
-                    optinHtml += linkHtml;
-                } else {
-                    infoHtml += linkHtml;
-                }
             }
         });
 
-        optinHtml += '</div></div>';
-        infoHtml += '</div></div>';
-
-        linksList.innerHTML = optinHtml + infoHtml;
+        linksList.innerHTML = html;
 
         // Generate QR codes after the HTML has been added to the DOM
         allLinks.forEach(function(link, index) {
