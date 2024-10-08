@@ -1,0 +1,37 @@
+function doGet(e) {
+  var sheetId = '1hCvScUNA_T0_WfaQkaxfBNIDVG4xcRYvb1d-DuyqUSg';
+  var sheetName = 'Sheet1';
+  var username = e.parameter.username;
+  var referralId = e.parameter.referral;
+  
+  if (!username && !referralId) {
+    return ContentService.createTextOutput(JSON.stringify({ error: 'No search term provided.' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName);
+  var data = sheet.getDataRange().getValues();
+
+  var headers = data[0];
+  var userRow = null;
+
+  // Search for the row that matches the provided username or referral ID
+  for (var i = 1; i < data.length; i++) {
+    if ((username && data[i][0].toString().trim().toLowerCase() === username.trim().toLowerCase()) ||
+        (referralId && data[i][1].toString().trim().toLowerCase() === referralId.trim().toLowerCase())) {
+      userRow = data[i];
+      break;
+    }
+  }
+
+  if (!userRow) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "No matching record found. Please check your input and try again." }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var responseData = [headers, userRow];
+
+  var jsonData = JSON.stringify(responseData);
+  return ContentService.createTextOutput(jsonData)
+    .setMimeType(ContentService.MimeType.JSON);
+}
