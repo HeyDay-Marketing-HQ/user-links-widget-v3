@@ -1,37 +1,98 @@
-function doGet(e) {
-  var sheetId = '1hCvScUNA_T0_WfaQkaxfBNIDVG4xcRYvb1d-DuyqUSg';
-  var sheetName = 'Sheet1';
-  var username = e.parameter.username;
-  var referralId = e.parameter.referral;
-  
-  if (!username && !referralId) {
-    return ContentService.createTextOutput(JSON.stringify({ error: 'No search term provided.' }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Personalized Page Links</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ... (previous styles remain the same) ... */
+        .link-item {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .link-content {
+            flex-grow: 1;
+        }
+        .qr-code {
+            width: 100px;
+            height: 100px;
+        }
+        @media (max-width: 768px) {
+            .link-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ... (previous HTML structure remains the same) ... -->
 
-  var sheet = SpreadsheetApp.openById(sheetId).getSheetByName(sheetName);
-  var data = sheet.getDataRange().getValues();
-
-  var headers = data[0];
-  var userRow = null;
-
-  // Search for the row that matches the provided username or referral ID
-  for (var i = 1; i < data.length; i++) {
-    if ((username && data[i][0].toString().trim().toLowerCase() === username.trim().toLowerCase()) ||
-        (referralId && data[i][1].toString().trim().toLowerCase() === referralId.trim().toLowerCase())) {
-      userRow = data[i];
-      break;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+    function fetchUserLinks(type) {
+        // ... (previous fetchUserLinks function remains the same) ...
     }
-  }
 
-  if (!userRow) {
-    return ContentService.createTextOutput(JSON.stringify({ error: "No matching record found. Please check your input and try again." }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+    function displayLinks(data) {
+        const linksList = document.getElementById('linksList');
+        const headers = data[0];
+        const userRow = data[1];
+        
+        let optinHtml = '<div class="links-column"><div class="link-group"><h2>Optin Page Links</h2>';
+        let infoHtml = '<div class="links-column"><div class="link-group"><h2>Info Page Links</h2>';
 
-  var responseData = [headers, userRow];
+        const allLinks = [
+            {sheet: 'General Optin', display: 'GENERAL OPTIN', type: 'optin'},
+            {sheet: 'Driver Optin', display: 'DRIVER OPTIN', type: 'optin'},
+            {sheet: 'Rider Optin', display: 'RIDER OPTIN', type: 'optin'},
+            {sheet: 'Rep Optin', display: 'REPS OPTIN', type: 'optin'},
+            {sheet: 'General', display: 'GENERAL INFO PAGE', type: 'info'},
+            {sheet: 'Driver', display: 'DRIVER INFO PAGE', type: 'info'},
+            {sheet: 'Rider', display: 'RIDER INFO PAGE', type: 'info'},
+            {sheet: 'Rep', display: 'REPS INFO PAGE', type: 'info'}
+        ];
 
-  var jsonData = JSON.stringify(responseData);
-  return ContentService.createTextOutput(jsonData)
-    .setMimeType(ContentService.MimeType.JSON);
-}
+        allLinks.forEach(function(link, index) {
+            const columnIndex = headers.indexOf(link.sheet);
+            if (columnIndex !== -1 && userRow[columnIndex]) {
+                const linkHtml = `
+                    <div class="link-item">
+                        <div class="link-content">
+                            <span class="link-name">${link.display}</span>
+                            <a href="${userRow[columnIndex]}" target="_blank" class="link-url">${userRow[columnIndex]}</a>
+                        </div>
+                        <div id="qrcode-${index}" class="qr-code"></div>
+                    </div>`;
+                
+                if (link.type === 'optin') {
+                    optinHtml += linkHtml;
+                } else {
+                    infoHtml += linkHtml;
+                }
+            }
+        });
+
+        optinHtml += '</div></div>';
+        infoHtml += '</div></div>';
+
+        linksList.innerHTML = optinHtml + infoHtml;
+
+        // Generate QR codes after the HTML has been added to the DOM
+        allLinks.forEach(function(link, index) {
+            const columnIndex = headers.indexOf(link.sheet);
+            if (columnIndex !== -1 && userRow[columnIndex]) {
+                new QRCode(document.getElementById(`qrcode-${index}`), {
+                    text: userRow[columnIndex],
+                    width: 100,
+                    height: 100
+                });
+            }
+        });
+    }
+    </script>
+</body>
+</html>
