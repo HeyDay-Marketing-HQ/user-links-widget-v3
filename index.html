@@ -131,12 +131,27 @@
                 align-items: flex-start;
             }
         }
+        .spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0,0,0,.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Your Personalized Page Links</h1>
         <div id="errorMessage" class="error-message"></div>
+          <div id="spinner" class="spinner"></div>
+        <div id="linksList" class="links-container"></div>
         <div class="input-section">
             <div class="input-row">
                 <input type="text" id="usernameInput" placeholder="Enter your username" />
@@ -153,13 +168,19 @@
 
     <script>
     function fetchUserLinks(type) {
-        const input = type === 'username' ? document.getElementById('usernameInput').value.trim() : document.getElementById('referralInput').value.trim();
+       const input = type === 'username' ? document.getElementById('usernameInput').value.trim() : document.getElementById('referralInput').value.trim();
         const errorMessage = document.getElementById('errorMessage');
+        const spinner = document.getElementById('spinner');
 
         if (!input) {
             errorMessage.textContent = `Please enter a valid ${type}`;
             return;
         }
+
+        // Show spinner
+        spinner.style.display = 'block';
+        errorMessage.textContent = '';
+        document.getElementById('linksList').innerHTML = '';
 
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbxODgmwA9CEYgT4e8UqOy62-ZtGwi6aPbsVJ3zzUK7dO9Fed_Xa6gVjhVw0KUmSliBs/exec';
 
@@ -173,20 +194,21 @@
                     const data = JSON.parse(text);
                     if (data.error) {
                         errorMessage.textContent = data.error;
-                        document.getElementById('linksList').innerHTML = '';
                     } else {
-                        errorMessage.textContent = '';
                         displayLinks(data);
                     }
                 } catch (e) {
                     console.error('Error parsing response:', e);
                     errorMessage.textContent = 'Error processing the response. Please try again later.';
-                    document.getElementById('linksList').innerHTML = '';
                 }
             })
             .catch(error => {
                 errorMessage.textContent = 'Error fetching your links. Please try again later.';
                 console.error('Error:', error);
+            })
+            .finally(() => {
+                // Hide spinner
+                spinner.style.display = 'none';
             });
     }
 
