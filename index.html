@@ -6,8 +6,117 @@
     <title>Your Personalized Page Links</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        /* ... (previous styles remain the same) ... */
+           body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .links-container {
+            display: flex;
+            gap: 30px;
+        }
+        .links-column {
+            flex: 1;
+        }
+        .link-group {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .link-group h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 20px;
+        }
         .link-item {
+            margin-bottom: 15px;
+        }
+        .link-name {
+            font-weight: 500;
+            color: #34495e;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .link-url {
+            display: block;
+            word-break: break-all;
+            color: #3498db;
+            text-decoration: none;
+            padding: 8px;
+            background-color: #e9f2fb;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .link-url:hover {
+            background-color: #d4e6f7;
+        }
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .or-divider {
+            text-align: center;
+            font-weight: 500;
+            color: #7f8c8d;
+            margin: 10px 0;
+        }
+        @media (max-width: 768px) {
+            .links-container {
+                flex-direction: column;
+            }
+        }
+           .link-item {
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -29,7 +138,95 @@
     </style>
 </head>
 <body>
-    <!-- ... (previous HTML structure remains the same) ... -->
+    <div class="container">
+        <h1>Your Personalized Page Links</h1>
+        <div id="errorMessage" class="error-message"></div>
+        <div class="input-section">
+            <div class="input-row">
+                <input type="text" id="usernameInput" placeholder="Enter your username" />
+                <button onclick="fetchUserLinks('username')">Get My Links</button>
+            </div>
+            <div class="or-divider">OR</div>
+            <div class="input-row">
+                <input type="text" id="referralInput" placeholder="Enter your referral ID" />
+                <button onclick="fetchUserLinks('referral')">Get My Links</button>
+            </div>
+        </div>
+        <div id="linksList" class="links-container"></div>
+    </div>
+
+    <script>
+    function fetchUserLinks(type) {
+    const input = type === 'username' ? document.getElementById('usernameInput').value.trim() : document.getElementById('referralInput').value.trim();
+
+    const errorMessage = document.getElementById('errorMessage');
+
+    if (!input) {
+        errorMessage.textContent = `Please enter a valid ${type}`;
+        return;
+    }
+
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxODgmwA9CEYgT4e8UqOy62-ZtGwi6aPbsVJ3zzUK7dO9Fed_Xa6gVjhVw0KUmSliBs/exec';
+
+    const params = new URLSearchParams();
+    params.append(type, input);
+
+    fetch(`${scriptUrl}?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                errorMessage.textContent = data.error;
+                document.getElementById('linksList').innerHTML = '';
+            } else {
+                errorMessage.textContent = '';
+                displayLinks(data);
+            }
+        })
+        .catch(error => {
+            errorMessage.textContent = 'Error fetching your links. Please try again later.';
+            console.error('Error:', error);
+        });
+}
+        function displayLinks(data) {
+            const linksList = document.getElementById('linksList');
+            const headers = data[0];
+            const userRow = data[1];
+            
+            let optinHtml = '<div class="links-column"><div class="link-group"><h2>Optin Page Links</h2>';
+            let infoHtml = '<div class="links-column"><div class="link-group"><h2>Info Page Links</h2>';
+
+            const allLinks = [
+                {sheet: 'General Optin', display: 'GENERAL OPTIN', type: 'optin'},
+                {sheet: 'Driver Optin', display: 'DRIVER OPTIN', type: 'optin'},
+                {sheet: 'Rider Optin', display: 'RIDER OPTIN', type: 'optin'},
+                {sheet: 'Rep Optin', display: 'REPS OPTIN', type: 'optin'},
+                {sheet: 'General', display: 'GENERAL INFO PAGE', type: 'info'},
+                {sheet: 'Driver', display: 'DRIVER INFO PAGE', type: 'info'},
+                {sheet: 'Rider', display: 'RIDER INFO PAGE', type: 'info'},
+                {sheet: 'Rep', display: 'REPS INFO PAGE', type: 'info'}
+            ];
+
+            allLinks.forEach(function(link) {
+                const columnIndex = headers.indexOf(link.sheet);
+                if (columnIndex !== -1 && userRow[columnIndex]) {
+                    const linkHtml = `<div class="link-item">
+                        <span class="link-name">${link.display}</span>
+                        <a href="${userRow[columnIndex]}" target="_blank" class="link-url">${userRow[columnIndex]}</a>
+                    </div>`;
+                    
+                    if (link.type === 'optin') {
+                        optinHtml += linkHtml;
+                    } else {
+                        infoHtml += linkHtml;
+                    }
+                }
+            });
+
+            optinHtml += '</div></div>';
+            infoHtml += '</div></div>';
+
+            linksList.innerHTML = optinHtml + infoHtml;
+        }
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
